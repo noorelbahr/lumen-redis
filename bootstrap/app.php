@@ -21,9 +21,14 @@ $app = new Laravel\Lumen\Application(
     dirname(__DIR__)
 );
 
-// $app->withFacades();
+// Enable use of facades
+$app->withFacades();
 
-// $app->withEloquent();
+// Enable Eloquent
+$app->withEloquent();
+
+// Load auth config files
+$app->configure('auth');
 
 /*
 |--------------------------------------------------------------------------
@@ -65,6 +70,11 @@ $app->singleton(
 //     'auth' => App\Http\Middleware\Authenticate::class,
 // ]);
 
+$app->routeMiddleware([
+    'auth' => App\Http\Middleware\Authenticate::class,
+    'client' => \Laravel\Passport\Http\Middleware\CheckClientCredentials::class,
+]);
+
 /*
 |--------------------------------------------------------------------------
 | Register Service Providers
@@ -79,6 +89,9 @@ $app->singleton(
 // $app->register(App\Providers\AppServiceProvider::class);
 // $app->register(App\Providers\AuthServiceProvider::class);
 // $app->register(App\Providers\EventServiceProvider::class);
+
+$app->register(Laravel\Passport\PassportServiceProvider::class);
+$app->register(Dusterio\LumenPassport\PassportServiceProvider::class);
 
 /*
 |--------------------------------------------------------------------------
