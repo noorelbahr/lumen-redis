@@ -15,7 +15,7 @@ class Controller extends BaseController
      */
     public function success($data, $code = 200) {
         return response()
-            ->json(['data' => $data], $code);
+            ->json(['data' => $data], $code ? : 200);
     }
 
     /**
@@ -27,6 +27,6 @@ class Controller extends BaseController
      */
     public function error($message, $code = 500) {
         return response()
-            ->json(['error_message' => $message], $code);
+            ->json(['error_message' => $message], $code ? : 500);
     }
 }

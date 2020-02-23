@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: bahrie
- * Date: 2020-02-20
- * Time: 22:21
- */
 
 return [
     'defaults' => [

@@ -15,12 +15,26 @@ $router->get('/', function () use ($router) {
     return $router->app->version();
 });
 
+$api = app('Dingo\Api\Routing\Router');
+
+$api->version('v1', function ($api) {
+
+    $api->group(['prefix' => 'oauth'], function ($api) {
+        $api->post('token', '\Laravel\Passport\Http\Controllers\AccessTokenController@issueToken');
+    });
+
+    $api->group(['namespace' => 'App\Http\Controllers', 'middleware' => ['auth:api', 'cors']], function ($api) {
+
+    });
+
+});
+
 // API Routes
-$router->group(['prefix' => 'api'], function () use ($router) {
+$router->group(['prefix' => 'api', 'middleware' => ['auth:api', 'cors']], function () use ($router) {
     // Authors
-    $router->get('authors',  ['uses' => 'AuthorController@showAuthors']);
-    $router->get('authors/{id}', ['uses' => 'AuthorController@findAuthor']);
-    $router->post('authors', ['uses' => 'AuthorController@createAuthor']);
-    $router->put('authors/{id}', ['uses' => 'AuthorController@updateAuthor']);
-    $router->delete('authors/{id}', ['uses' => 'AuthorController@deleteAuthor']);
+    $router->get('users',  ['uses' => 'UserController@index']);
+    $router->get('users/{id}', ['uses' => 'UserController@show']);
+    $router->post('users', ['uses' => 'UserController@store']);
+    $router->put('users/{id}', ['uses' => 'UserController@update']);
+    $router->delete('users/{id}', ['uses' => 'UserController@destroy']);
 });
