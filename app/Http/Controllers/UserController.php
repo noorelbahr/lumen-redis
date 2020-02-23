@@ -2,62 +2,63 @@
 
 namespace App\Http\Controllers;
 
+use App\Repositories\UserRepositoryInterface;
 use App\User;
+use App\Http\Resources\User as UserResource;
+use App\Http\Resources\UserCollection;
 use Exception;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Validator;
+use Illuminate\Support\Facades\Validator;
 
 class UserController extends Controller
 {
+    private $userRepository;
+    public function __construct(UserRepositoryInterface $userRepository)
+    {
+        $this->userRepository = $userRepository;
+    }
+
     /**
      * Show all users
      * - - -
-     * @return \Illuminate\Http\JsonResponse
+     * @return UserCollection
      */
-    public function index() {
-        try {
-            return $this->success(User::all());
-
-        } catch (Exception $e) {
-            return $this->error($e->getMessage(), $e->getCode());
-        }
+    public function index()
+    {
+        $users = $this->userRepository->all();
+        return new UserCollection($users);
     }
 
     /**
      * Find an user
      * - - -
      * @param $id
-     * @return \Illuminate\Http\JsonResponse
+     * @return UserResource
      */
-    public function show($id) {
-        try {
-            // Check user data
-            $user = User::find($id);
-            if (!$user)
-                throw new Exception('User not found.', 400);
-
-            return $this->success($user);
-
-        } catch (Exception $e) {
-            return $this->error($e->getMessage(), $e->getCode());
-        }
+    public function show($id)
+    {
+        $user = $this->userRepository->find($id);
+        return new UserResource($user);
     }
 
     /**
      * Create an user
      * - - -
      * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return UserResource|JsonResponse
      */
-    public function store(Request $request) {
+    public function store(Request $request)
+    {
         try {
             // Validation roles
             $validator = Validator::make($request->all(), [
                 'email'     => 'required|email|unique:users',
                 'fullname'  => 'required|string|max:70',
-                'password'  => 'required|min:6|confirmed',
-                'gender'    => 'nullable|in:male,female'
+                'gender'    => 'nullable|in:male,female',
+                'password'  => 'required|min:6|confirmed'
             ]);
 
             // Throw on validation fails
@@ -65,18 +66,21 @@ class UserController extends Controller
                 throw new Exception($validator->errors()->first(), 400);
 
             // Set user data
-            $user = new User();
-            $user->email        = $request->email;
-            $user->fullname     = $request->fullname;
-            $user->password     = Hash::make($request->password);
-            $user->gender       = $request->gender;
-            $user->created_by   = '';
+            $userData = [
+                'email'         => $request->email,
+                'fullname'      => $request->fullname,
+                'gender'        => $request->gender,
+                'password'      => Hash::make($request->password),
+                'created_by'    => Auth::user() ? Auth::user()->id : null
+            ];
 
             // Save data
-            if (!$user->save())
+            $user = $this->userRepository->create($userData);
+
+            if (!$user)
                 throw new Exception('Failed to create user data.', 500);
 
-            return $this->success($user, 201);
+            return new UserResource($user);
 
         } catch (Exception $e) {
             return $this->error($e->getMessage(), $e->getCode());
@@ -88,16 +92,17 @@ class UserController extends Controller
      * - - -
      * @param Request $request
      * @param $id
-     * @return \Illuminate\Http\JsonResponse
+     * @return UserResource|JsonResponse
      */
-    public function update(Request $request, $id) {
+    public function update(Request $request, $id)
+    {
         try {
             // Validation roles
             $validator = Validator::make($request->all(), [
                 'email'     => 'required|email|unique:users,email,' . $id,
                 'fullname'  => 'required|string|max:70',
-                'password'  => 'nullable|min:6|confirmed',
-                'gender'    => 'nullable|in:male,female'
+                'gender'    => 'nullable|in:male,female',
+                'password'  => 'nullable|min:6|confirmed'
             ]);
 
             // Throw on validator fails
@@ -105,25 +110,28 @@ class UserController extends Controller
                 throw new Exception($validator->errors()->first(), 400);
 
             // Check user data
-            $user = User::find($id);
-            if (!$user)
+            $userExist = $this->userRepository->find($id);
+            if (!$userExist)
                 throw new Exception('User not found.', 400);
 
             // Set user data
-            $user->email        = $request->email;
-            $user->fullname     = $request->fullname;
-            $user->gender       = $request->gender;
-            $user->updated_by   = '';
+            $userData = [
+                'email'         => $request->email,
+                'fullname'      => $request->fullname,
+                'gender'        => $request->gender,
+                'updated_by'    => Auth::user() ? Auth::user()->id : null
+            ];
 
             // Has password?
-            if ($request->password)
-                $user->password = Hash::make($request->password);
+            if ($request->has('password'))
+                $userData['password'] = Hash::make($request->password);
 
             // Save data
-            if (!$user->save())
+            $user = $this->userRepository->update($id, $userData);
+            if (!$user)
                 throw new Exception('Failed to save user data.', 500);
 
-            return $this->success($user, 200);
+            return new UserResource($user);
 
         } catch (Exception $e) {
             return $this->error($e->getMessage(), $e->getCode());
@@ -134,9 +142,10 @@ class UserController extends Controller
      * Delete an user
      * - - -
      * @param $id
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
-    public function destroy($id) {
+    public function destroy($id)
+    {
         try {
             // Check user data
             $user = User::find($id);

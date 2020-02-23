@@ -96,6 +96,8 @@ $app->register(Dusterio\LumenPassport\PassportServiceProvider::class);
 $app->register(Fruitcake\Cors\CorsServiceProvider::class);
 $app->register(Dingo\Api\Provider\LumenServiceProvider::class);
 
+$app->register(App\Providers\RepositoryServiceProvider::class);
+
 /*
 |--------------------------------------------------------------------------
 | Load The Application Routes
