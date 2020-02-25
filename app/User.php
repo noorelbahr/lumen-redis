@@ -66,7 +66,7 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
 
         foreach ($roles as $role) {
             $permissionList = $role->mapped_permissions;
-            if ($permissionList && in_array($permission, $permissionList))
+            if ($permissionList && isset($permissionList[$permission]) && $permissionList[$permission])
                 return true;
         }
 

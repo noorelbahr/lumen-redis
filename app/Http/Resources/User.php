@@ -14,12 +14,15 @@ class User extends Resource
      */
     public function toArray($request)
     {
+        // Get single role
+        $role = $this->roles->first();
+
         return [
             'id'            => $this->id,
             'email'         => $this->email,
             'fullname'      => $this->fullname,
             'gender'        => $this->gender,
-//            'picture'       => $this->picture ? url($this->picture) : null,
+            'role'          => $role ? $role->name : null,
             'created_at'    => $this->created_at,
             'updated_at'    => $this->updated_at
         ];

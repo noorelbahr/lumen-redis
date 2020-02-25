@@ -2,15 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\RoleRequest;
 use App\Http\Resources\RoleCollection;
 use App\Repositories\RoleRepositoryInterface;
 use App\Http\Resources\Role as RoleResource;
 use Exception;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Validator;
 
 class RoleController extends Controller
 {
@@ -23,36 +21,25 @@ class RoleController extends Controller
     /**
      * Show all roles
      * - - -
+     * @param RoleRequest $request -> Validate request & permission
      * @return RoleCollection
      */
-    public function index()
+    public function index(RoleRequest $request)
     {
-        try {
-            // Check access
-            if (!Auth::user()->hasAccess('role.list'))
-                throw new Exception('Permission denied.', 403);
-
-            $roles = $this->roleRepository->paginate(10);
-            return new RoleCollection($roles);
-
-        } catch (Exception $e) {
-            return $this->error($e->getMessage(), $e->getCode());
-        }
+        $roles = $this->roleRepository->paginate(10);
+        return new RoleCollection($roles);
     }
 
     /**
      * Find a role
      * - - -
+     * @param RoleRequest $request -> Validate request & permission
      * @param $id
      * @return RoleResource|JsonResponse
      */
-    public function show($id)
+    public function show(RoleRequest $request, $id)
     {
         try {
-            // Check access
-            if (!Auth::user()->hasAccess('role.detail'))
-                throw new Exception('Permission denied.', 403);
-
             // Check role data
             $role = $this->roleRepository->find($id);
             if (!$role)
@@ -68,29 +55,13 @@ class RoleController extends Controller
     /**
      * Create a role
      * - - -
-     * @param Request $request
+     * @param RoleRequest $request -> Validate request & permission
      * @return RoleResource|JsonResponse
      */
-    public function store(Request $request)
+    public function store(RoleRequest $request)
     {
         try {
-            // Check access
-            if (!Auth::user()->hasAccess('role.create'))
-                throw new Exception('Permission denied.', 403);
-
-            // Validation roles
-            $validator = Validator::make($request->all(), [
-                'slug'          => 'required|string|max:50|unique:roles',
-                'name'          => 'required|string|max:70',
-                'permissions'   => 'required|array'
-            ]);
-
-            // Throw on validation fails
-            if ($validator->fails())
-                throw new Exception($validator->errors()->first(), 400);
-
-
-            // Set user data
+            // Set role data
             $roleData = [
                 'slug'          => $request->input('slug'),
                 'name'          => $request->input('name'),
@@ -102,7 +73,7 @@ class RoleController extends Controller
             $role = $this->roleRepository->create($roleData);
 
             if (!$role)
-                throw new Exception('Failed to create user data.', 500);
+                throw new Exception('Failed to create role data.', 500);
 
             return new RoleResource($role);
 
@@ -112,96 +83,73 @@ class RoleController extends Controller
     }
 
     /**
-     * Update an user
+     * Update a role
      * - - -
-     * @param Request $request
+     * @param RoleRequest $request -> Validate request & permission
      * @param $id
-     * @return UserResource|JsonResponse
+     * @return RoleResource|JsonResponse
      */
-//    public function update(Request $request, $id)
-//    {
-//        try {
-//            // Check user data
-//            $user = $this->roleRepository->find($id);
-//            if (!$user)
-//                throw new Exception('Role not found.', 400);
-//
-//            // Validation roles
-//            $validator = Validator::make($request->all(), [
-//                'email'     => 'required|email|unique:users,email,' . $id,
-//                'fullname'  => 'required|string|max:70',
-//                'gender'    => 'nullable|in:male,female',
-//                'password'  => 'nullable|min:6|confirmed'
-//            ]);
-//
-//            // Throw on validator fails
-//            if ($validator->fails())
-//                throw new Exception($validator->errors()->first(), 400);
-//
-//            // Check user data
-//            $userExist = $this->roleRepository->find($id);
-//            if (!$userExist)
-//                throw new Exception('User not found.', 400);
-//
-//            // Set user data
-//            $userData = [
-//                'email'         => $request->email,
-//                'fullname'      => $request->fullname,
-//                'gender'        => $request->gender,
-//                'updated_by'    => Auth::user() ? Auth::user()->id : null
-//            ];
-//
-//            // Has password?
-//            if ($request->has('password'))
-//                $userData['password'] = Hash::make($request->password);
-//
-//            // Save data
-//            $user = $this->roleRepository->update($id, $userData);
-//            if (!$user)
-//                throw new Exception('Failed to save user data.', 500);
-//
-//            return new UserResource($user);
-//
-//        } catch (Exception $e) {
-//            return $this->error($e->getMessage(), $e->getCode());
-//        }
-//    }
-//
-//    /**
-//     * Delete an user
-//     * - - -
-//     * @param $id
-//     * @return JsonResponse
-//     */
-//    public function destroy($id)
-//    {
-//        try {
-//            // Check user data
-//            $user = $this->roleRepository->find($id);
-//            if (!$user)
-//                throw new Exception('User not found.', 400);
-//
-//            $this->roleRepository->delete($id);
-//
-//            return $this->success('The data has been removed successfully.');
-//
-//        } catch (Exception $e) {
-//            return $this->error($e->getMessage(), $e->getCode());
-//        }
-//    }
+    public function update(RoleRequest $request, $id)
+    {
+        try {
+            // Check role data
+            $roleExist = $this->roleRepository->find($id);
+            if (!$roleExist)
+                throw new Exception('Role not found.', 400);
+
+            // Set role data
+            $roleData = [
+                'slug'          => $request->input('slug'),
+                'name'          => $request->input('name'),
+                'permissions'   => $this->formatPermissions($request->input('permissions')),
+                'updated_by'    => Auth::user() ? Auth::user()->id : null
+            ];
+
+            // Save data
+            $role = $this->roleRepository->update($id, $roleData);
+            if (!$role)
+                throw new Exception('Failed to save role data.', 500);
+
+            return new RoleResource($role);
+
+        } catch (Exception $e) {
+            return $this->error($e->getMessage(), $e->getCode());
+        }
+    }
+
+    /**
+     * Delete a role
+     * - - -
+     * @param RoleRequest $request -> Validate request & permission
+     * @param $id
+     * @return JsonResponse
+     */
+    public function destroy(RoleRequest $request, $id)
+    {
+        try {
+            // Check role data
+            $role = $this->roleRepository->find($id);
+            if (!$role)
+                throw new Exception('Role not found.', 400);
+
+            $this->roleRepository->delete($id);
+
+            return $this->success('The data has been removed successfully.');
+
+        } catch (Exception $e) {
+            return $this->error($e->getMessage(), $e->getCode());
+        }
+    }
 
     /**
      * Get list of available permissions in config
      * - - -
+     * @param RoleRequest $request -> Validate request & permission
      * @return JsonResponse
      */
-    public function permissionList()
+    public function permissionList(RoleRequest $request)
     {
         try {
-            // Check access
-            if (!Auth::user()->hasAccess('role.permission.list'))
-                throw new Exception('Permission denied.', 403);
-
             return $this->success(config('permissions', []));
 
         } catch (Exception $e) {

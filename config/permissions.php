@@ -12,13 +12,13 @@ return [
     'roles.create',
     'roles.update',
     'roles.delete',
-    'roles.permission.list',
+    'roles.permissions',
     'news.list',
     'news.detail',
     'news.create',
     'news.update',
     'news.delete',
-    'news.comment.create',
+    'news.comment',
     'news.like',
     'news.unlike'
 ];

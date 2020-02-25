@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\NewsRequest;
 use App\Http\Resources\NewsComment as NewsCommentResource;
+use App\Jobs\CommentJob;
 use App\Repositories\NewsRepositoryInterface;
 use Exception;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Validator;
 
 class NewsCommentController extends Controller
 {
@@ -21,37 +21,29 @@ class NewsCommentController extends Controller
     /**
      * Comment a news
      * - - -
-     * @param Request $request
+     * @param NewsRequest $request -> Validate request & permission
      * @param $newsId
      * @return NewsCommentResource|JsonResponse
      */
-    public function store(Request $request, $newsId)
+    public function comment(NewsRequest $request, $newsId)
     {
         try {
-            // Validation roles
-            $validator = Validator::make($request->all(), [
-                'comment' => 'required|string'
-            ]);
-
-            // Throw on validator fails
-            if ($validator->fails())
-                throw new Exception($validator->errors()->first(), 400);
-
             // Check news
             $news = $this->newsRepository->find($newsId);
             if (!$news)
                 throw new Exception('Data not found.', 400);
 
-            // Save comment
-            $comment = $news->comments()->create([
+            // Create job for saving a comment
+            $job = new CommentJob($news, [
                 'user_id'       => Auth::user()->id,
                 'comment'       => $request->input('comment'),
                 'created_by'    => Auth::user()->id
             ]);
-            if (!$comment)
-                throw new Exception('Failed to save comment data.', 500);
 
-            return new NewsCommentResource($comment);
+            // Add delay time to the job for 60 seconds, to see our job is exist in redis-cli
+            $this->dispatch($job->delay(60));
+
+            return $this->success('Comment queued.');
 
         } catch (Exception $e) {
             return $this->error($e->getMessage(), $e->getCode());

@@ -11,8 +11,11 @@
         "dusterio/lumen-passport": "^0.2.15",
         "flipbox/lumen-generator": "^6.0",
         "fruitcake/laravel-cors": "^1.0",
+        "illuminate/redis": "^5.8",
         "laravel/lumen-framework": "5.8.*",
         "laravelista/lumen-vendor-publish": "^5.8",
+        "predis/predis": "^1.1",
+        "urameshibr/lumen-form-request": "^1.5",
         "webpatser/laravel-uuid": "^3.0"
     },
     "require-dev": {

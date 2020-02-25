@@ -2,17 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\UserRequest;
 use App\Repositories\RoleRepositoryInterface;
 use App\Repositories\UserRepositoryInterface;
 use App\Http\Resources\User as UserResource;
 use App\Http\Resources\UserCollection;
+use App\User;
 use Exception;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Validator;
 
 class UserController extends Controller
 {
@@ -27,36 +27,25 @@ class UserController extends Controller
     /**
      * Show all users
      * - - -
+     * @param UserRequest $request -> Validate request & permission
      * @return UserCollection|JsonResponse
      */
-    public function index()
+    public function index(UserRequest $request)
     {
-        try {
-            // Check access
-//            if (!Auth::user()->hasAccess('users.list'))
-//                throw new Exception('Permission denied.', 403);
-
-            $users = $this->userRepository->paginate(10);
-            return new UserCollection($users);
-
-        } catch (Exception $e) {
-            return $this->error($e->getMessage(), $e->getCode());
-        }
+        $users = $this->userRepository->paginate(10);
+        return new UserCollection($users);
     }
 
     /**
      * Find an user
      * - - -
+     * @param UserRequest $request -> Validate request & permission
      * @param $id
      * @return UserResource|JsonResponse
      */
-    public function show($id)
+    public function show(UserRequest $request, $id)
     {
         try {
-            // Check access
-            if (!Auth::user()->hasAccess('users.detail'))
-                throw new Exception('Permission denied.', 403);
-
             // Check user data
             $user = $this->userRepository->find($id);
             if (!$user)
@@ -72,27 +61,16 @@ class UserController extends Controller
     /**
      * Create an user
      * - - -
-     * @param Request $request
+     * @param UserRequest $request -> Validate request & permission
      * @return UserResource|JsonResponse
      */
-    public function store(Request $request)
+    public function store(UserRequest $request)
     {
         try {
-            // Check access
-            if (!Auth::user()->hasAccess('users.create'))
-                throw new Exception('Permission denied.', 403);
-
-            // Validation roles
-            $validator = Validator::make($request->all(), [
-                'email'     => 'required|email|unique:users',
-                'fullname'  => 'required|string|max:70',
-                'gender'    => 'nullable|in:male,female',
-                'password'  => 'required|min:6|confirmed'
-            ]);
-
-            // Throw on validation fails
-            if ($validator->fails())
-                throw new Exception($validator->errors()->first(), 400);
+            // Check role data
+            $role = $this->roleRepository->findBySlug($request->input('role'));
+            if (!$role)
+                throw new Exception('Role not found.', 400);
 
             // Set user data
             $userData = [
@@ -109,6 +87,9 @@ class UserController extends Controller
             if (!$user)
                 throw new Exception('Failed to create user data.', 500);
 
+            // Attach role
+            $user->roles()->attach($role);
+
             return new UserResource($user);
 
         } catch (Exception $e) {
@@ -119,36 +100,14 @@ class UserController extends Controller
     /**
      * Update an user
      * - - -
-     * @param Request $request
+     * @param UserRequest $request -> Validate request & permission
      * @param $id
      * @return UserResource|JsonResponse
      */
-    public function update(Request $request, $id)
+    public function update(UserRequest $request, $id)
     {
         DB::beginTransaction();
         try {
-            // Check access
-//            if (!Auth::user()->hasAccess('users.update'))
-//                throw new Exception('Permission denied.', 403);
-
-            // Check user data
-            $user = $this->userRepository->find($id);
-            if (!$user)
-                throw new Exception('User not found.', 400);
-
-            // Validation roles
-            $validator = Validator::make($request->all(), [
-                'email'     => 'required|email|unique:users,email,' . $id,
-                'fullname'  => 'required|string|max:70',
-                'gender'    => 'nullable|in:male,female',
-                'password'  => 'nullable|min:6|confirmed',
-                'role'      => 'required|exists:roles,slug'
-            ]);
-
-            // Throw on validator fails
-            if ($validator->fails())
-                throw new Exception($validator->errors()->first(), 400);
-
             // Check user data
             $userExist = $this->userRepository->find($id);
             if (!$userExist)
@@ -176,6 +135,7 @@ class UserController extends Controller
             if (!$user)
                 throw new Exception('Failed to save user data.', 500);
 
+            // Attach role
             $user->roles()->attach($role);
 
             DB::commit();
@@ -191,16 +151,13 @@ class UserController extends Controller
     /**
      * Delete an user
      * - - -
+     * @param UserRequest $request -> Validate request & permission
      * @param $id
      * @return JsonResponse
      */
-    public function destroy($id)
+    public function destroy(UserRequest $request, $id)
     {
         try {
-            // Check access
-            if (!Auth::user()->hasAccess('users.delete'))
-                throw new Exception('Permission denied.', 403);
-
             // Check user data
             $user = $this->userRepository->find($id);
             if (!$user)

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\NewsRequest;
 use App\Http\Resources\NewsLike as NewsLikeResource;
 use App\Repositories\NewsRepositoryInterface;
 use Exception;
@@ -19,10 +20,11 @@ class NewsLikeController extends Controller
     /**
      * Like a news
      * - - -
+     * @param NewsRequest $request -> Validate request & permission
      * @param $newsId
      * @return NewsLikeResource|JsonResponse
      */
-    public function like($newsId)
+    public function like(NewsRequest $request, $newsId)
     {
         try {
             // Check news
@@ -49,10 +51,11 @@ class NewsLikeController extends Controller
     /**
      * Unlike a news
      * - - -
+     * @param NewsRequest $request -> Validate request & permission
      * @param $newsId
      * @return JsonResponse
      */
-    public function unlike($newsId)
+    public function unlike(NewsRequest $request, $newsId)
     {
         try {
             // Check news

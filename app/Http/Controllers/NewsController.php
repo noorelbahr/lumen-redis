@@ -3,15 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Events\NewsEvent;
+use App\Http\Requests\NewsRequest;
 use App\Repositories\NewsRepositoryInterface;
 use App\Http\Resources\News as NewsResource;
 use App\Http\Resources\NewsCollection;
 use Exception;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 
 class NewsController extends Controller
@@ -25,36 +24,25 @@ class NewsController extends Controller
     /**
      * Show all news
      * - - -
+     * @param NewsRequest $request -> Validate request & permission
      * @return NewsCollection|JsonResponse
      */
-    public function index()
+    public function index(NewsRequest $request)
     {
-        try {
-            // Check access
-            if (!Auth::user()->hasAccess('news.list'))
-                throw new Exception('Permission denied.', 403);
-
-            $news = $this->newsRepository->paginate(10);
-            return new NewsCollection($news);
-
-        } catch (Exception $e) {
-            return $this->error($e->getMessage(), $e->getCode());
-        }
+        $news = $this->newsRepository->paginate(10);
+        return new NewsCollection($news);
     }
 
     /**
      * Show news detail
      * - - -
+     * @param NewsRequest $request -> Validate request & permission
      * @param $id
      * @return NewsResource|JsonResponse
      */
-    public function show($id)
+    public function show(NewsRequest $request, $id)
     {
         try {
-            // Check access
-            if (!Auth::user()->hasAccess('news.detail'))
-                throw new Exception('Permission denied.', 403);
-
             $news = $this->newsRepository->find($id);
             if (!$news)
                 throw new Exception('Data not found.', 400);
@@ -69,28 +57,12 @@ class NewsController extends Controller
     /**
      * Create a news
      * - - -
-     * @param Request $request
+     * @param NewsRequest $request -> Validate request & permission
      * @return NewsResource|JsonResponse
      */
-    public function store(Request $request)
+    public function store(NewsRequest $request)
     {
         try {
-            // Check access
-            if (!Auth::user()->hasAccess('news.create'))
-                throw new Exception('Permission denied.', 403);
-
-            // Validation roles
-            $validator = Validator::make($request->all(), [
-                'title'         => 'required|string|max:150',
-                'content'       => 'required',
-                'heading_image' => 'required|image|max:2048',
-                'tags'          => 'nullable|array'
-            ]);
-
-            // Throw on validation fails
-            if ($validator->fails())
-                throw new Exception($validator->errors()->first(), 400);
-
             // Handle slug
             $slug = Str::slug($request->input('title'), '-');
             $slugCount = $this->newsRepository->countBySlug($slug);
@@ -138,33 +110,17 @@ class NewsController extends Controller
     /**
      * Update a news
      * - - -
-     * @param Request $request
+     * @param NewsRequest $request -> Validate request & permission
      * @param $id
      * @return NewsResource|JsonResponse
      */
-    public function update(Request $request, $id)
+    public function update(NewsRequest $request, $id)
     {
         try {
-            // Check access
-            if (!Auth::user()->hasAccess('news.update'))
-                throw new Exception('Permission denied.', 403);
-
             // Check news
             $news = $this->newsRepository->find($id);
             if (!$news)
                 throw new Exception('Data not found.', 400);
-
-            // Validation roles
-            $validator = Validator::make($request->all(), [
-                'title'         => 'required|string|max:150',
-                'content'       => 'required',
-                'heading_image' => 'nullable|image|max:2048',
-                'tags'          => 'nullable|array'
-            ]);
-
-            // Throw on validator fails
-            if ($validator->fails())
-                throw new Exception($validator->errors()->first(), 400);
 
             // Handle slug
             $slug = Str::slug($request->input('title'), '-');
@@ -212,16 +168,13 @@ class NewsController extends Controller
     /**
      * Delete a news
      * - - -
+     * @param NewsRequest $request -> Validate request & permission
      * @param $id
      * @return JsonResponse
      */
-    public function destroy($id)
+    public function destroy(NewsRequest $request, $id)
     {
         try {
-            // Check access
-            if (!Auth::user()->hasAccess('news.delete'))
-                throw new Exception('Permission denied.', 403);
-
             // Check news
             $news = $this->newsRepository->find($id);
             if (!$news)
