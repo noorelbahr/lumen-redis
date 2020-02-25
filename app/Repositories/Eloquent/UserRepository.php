@@ -13,31 +13,36 @@ class UserRepository implements UserRepositoryInterface
         $this->user = $user;
     }
 
-    public function all()
+    public function all() : array
     {
         return $this->user->all();
     }
 
-    public function find($id)
+    public function paginate(int $page)
+    {
+        return $this->user->paginate($page);
+    }
+
+    public function find(string $id) : ?User
     {
         return $this->user->find($id);
     }
 
-    public function create(array $attributes)
+    public function create(array $attributes) : User
     {
         return $this->user->create($attributes);
     }
 
-    public function update($id, array $attributes)
+    public function update(string $id, array $attributes) : User
     {
-        $user = $this->user->find($id);
+        $user = $this->user->findOrFail($id);
         $user->update($attributes);
         return $user;
     }
 
-    public function delete($id)
+    public function delete(string $id) : void
     {
-        $user = $this->user->find($id);
-        return $user->delete();
+        $user = $this->user->findOrFail($id);
+        $user->delete();
     }
 }

@@ -3,8 +3,9 @@
 namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\Resource;
+use App\Http\Resources\User as UserResource;
 
-class User extends Resource
+class NewsComment extends Resource
 {
     /**
      * Transform the resource into an array.
@@ -16,12 +17,10 @@ class User extends Resource
     {
         return [
             'id'            => $this->id,
-            'email'         => $this->email,
-            'fullname'      => $this->fullname,
-            'gender'        => $this->gender,
-//            'picture'       => $this->picture ? url($this->picture) : null,
+            'comment'       => $this->comment,
             'created_at'    => $this->created_at,
-            'updated_at'    => $this->updated_at
+            'updated_at'    => $this->updated_at,
+            'user'          => new UserResource($this->user)
         ];
     }
 }

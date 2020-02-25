@@ -43,4 +43,33 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
         'deleted_at',
         'deleted_by'
     ];
+
+    /**
+     * Belongs to Many
+     */
+    public function roles()
+    {
+        return $this->belongsToMany('App\Models\Role', 'role_users','user_id', 'role_id')->withTimestamps();
+    }
+
+    /**
+     * Check user access
+     * - - -
+     * @param string $permission
+     * @return bool
+     */
+    public function hasAccess(string $permission) : bool
+    {
+        $roles = $this->roles;
+        if (!$roles)
+            return false;
+
+        foreach ($roles as $role) {
+            $permissionList = $role->mapped_permissions;
+            if ($permissionList && in_array($permission, $permissionList))
+                return true;
+        }
+
+        return false;
+    }
 }

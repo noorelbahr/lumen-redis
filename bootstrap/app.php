@@ -29,7 +29,8 @@ $app->withEloquent();
 
 // Load config files
 $app->configure('auth');
-//$app->configure('cors');
+$app->configure('cors');
+$app->configure('permissions');
 
 /*
 |--------------------------------------------------------------------------
@@ -94,7 +95,7 @@ $app->register(Dusterio\LumenPassport\PassportServiceProvider::class);
 \Dusterio\LumenPassport\LumenPassport::routes($app);
 
 $app->register(Fruitcake\Cors\CorsServiceProvider::class);
-$app->register(Dingo\Api\Provider\LumenServiceProvider::class);
+//$app->register(Dingo\Api\Provider\LumenServiceProvider::class);
 
 $app->register(App\Providers\RepositoryServiceProvider::class);
 

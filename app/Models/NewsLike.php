@@ -17,4 +17,12 @@ class NewsLike extends Model
         'created_by',
         'updated_by'
     ];
+
+    /**
+     * Belongs To
+     */
+    public function user()
+    {
+        return $this->belongsTo('App\User', 'user_id');
+    }
 }

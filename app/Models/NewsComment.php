@@ -32,4 +32,12 @@ class NewsComment extends Model
         'deleted_at',
         'deleted_by'
     ];
+
+    /**
+     * Belongs To
+     */
+    public function user()
+    {
+        return $this->belongsTo('App\User', 'user_id');
+    }
 }

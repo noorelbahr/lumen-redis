@@ -15,26 +15,34 @@ $router->get('/', function () use ($router) {
     return $router->app->version();
 });
 
-$api = app('Dingo\Api\Routing\Router');
+$router->group(['prefix' => 'v1'], function ($api) {
 
-$api->version('v1', function ($api) {
+    $api->group(['middleware' => ['auth:api', 'cors']], function ($api) {
+        // User routes
+        $api->get('users', ['uses' => 'UserController@index']);
+        $api->get('users/{id}', ['uses' => 'UserController@show']);
+        $api->post('users', ['uses' => 'UserController@store']);
+        $api->put('users/{id}', ['uses' => 'UserController@update']);
+        $api->delete('users/{id}', ['uses' => 'UserController@destroy']);
 
-    $api->group(['prefix' => 'oauth'], function ($api) {
-        $api->post('token', '\Laravel\Passport\Http\Controllers\AccessTokenController@issueToken');
+        // Role routes
+        $api->get('roles', ['uses' => 'RoleController@index']);
+        $api->get('roles/{id}', ['uses' => 'RoleController@show']);
+        $api->post('roles', ['uses' => 'RoleController@store']);
+        $api->put('roles/{id}', ['uses' => 'RoleController@update']);
+        $api->delete('roles/{id}', ['uses' => 'RoleController@destroy']);
+        $api->get('permission-list', ['uses' => 'RoleController@permissionList']);
+
+        // News routes
+        $api->get('news', ['uses' => 'NewsController@index']);
+        $api->get('news/{id}', ['uses' => 'NewsController@show']);
+        $api->post('news', ['uses' => 'NewsController@store']);
+        $api->put('news/{id}', ['uses' => 'NewsController@update']);
+        $api->delete('news/{id}', ['uses' => 'NewsController@destroy']);
+
+        $api->post('news/{id}/comment', ['uses' => 'NewsCommentController@store']);
+        $api->post('news/{id}/like', ['uses' => 'NewsLikeController@like']);
+        $api->delete('news/{id}/unlike', ['uses' => 'NewsLikeController@unlike']);
     });
 
-    $api->group(['namespace' => 'App\Http\Controllers', 'middleware' => ['auth:api', 'cors']], function ($api) {
-
-    });
-
-});
-
-// API Routes
-$router->group(['prefix' => 'api', 'middleware' => ['auth:api', 'cors']], function () use ($router) {
-    // Authors
-    $router->get('users',  ['uses' => 'UserController@index']);
-    $router->get('users/{id}', ['uses' => 'UserController@show']);
-    $router->post('users', ['uses' => 'UserController@store']);
-    $router->put('users/{id}', ['uses' => 'UserController@update']);
-    $router->delete('users/{id}', ['uses' => 'UserController@destroy']);
 });

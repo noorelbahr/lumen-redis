@@ -6,7 +6,7 @@ use App\Traits\Uuids;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Model;
 
-class News extends Model
+class Role extends Model
 {
     use Uuids, SoftDeletes;
 
@@ -18,12 +18,9 @@ class News extends Model
      * @var array
      */
     protected $fillable = [
-        'user_id',
         'slug',
-        'title',
-        'content',
-        'heading_image',
-        'tags',
+        'name',
+        'permissions',
         'created_by',
         'updated_by',
         'deleted_by'
@@ -40,16 +37,23 @@ class News extends Model
     ];
 
     /**
-     * Has Many
+     * Belongs to Many
      */
-    public function comments()
+    public function users()
     {
-        return $this->hasMany('App\Models\NewsComment', 'news_id');
+        return $this->belongsToMany('App\User', 'role_users','role_id', 'user_id')->withTimestamps();
     }
 
-    public function likes()
+    /**
+     * Get mapped permissions list
+     * - - -
+     * @return mixed|null
+     */
+    public function getMappedPermissionsAttribute()
     {
-        return $this->hasMany('App\Models\NewsLike', 'news_id');
+        return $this->permissions ?
+            json_decode($this->permissions, true) :
+            null;
     }
 
 }
