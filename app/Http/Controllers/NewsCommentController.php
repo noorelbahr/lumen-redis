@@ -40,7 +40,7 @@ class NewsCommentController extends Controller
                 'created_by'    => Auth::user()->id
             ]);
 
-            // Add delay time to the job for 60 seconds, to see our job is exist in redis-cli
+            // Add delay time to the job for 60 seconds, to see that our job is running and exist in redis-cli
             $this->dispatch($job->delay(60));
 
             return $this->success('Comment queued.');

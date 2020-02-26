@@ -80,5 +80,54 @@ link
 
 You can test every single endpoint in the postman collection
 
-#### Test Redis Queue
+#### Testing Redis Queue
+Now we are going to test our `queue job` with `redis`. In the project, we have 1 job (`CommentJob.php`) created in `app/Jobs` directory.
 
+The comment job will be called in `NewsCommentController.php` when we hit comment creation API (`POST` : `/v1/news/:id/comment`)
+```
+// Create job for saving a comment
+$job = new CommentJob($news, [
+    'user_id'       => Auth::user()->id,
+    'comment'       => $request->input('comment'),
+    'created_by'    => Auth::user()->id
+]);
+
+// Add delay time to the job for 60 seconds, to see that our job is running and exist in redis-cli
+$this->dispatch($job->delay(60));
+```
+
+Before hitting the comment creation API, `Make sure Redis Server is already installed` and run command below in the project root directory to listen our queue job :
+```
+php artisan queue:listen
+```
+
+and then hit comment creation API (`POST` : `/v1/news/:id/comment`) and wait for the queue job to work about 60 minutes (mentioned above : `$job->delay(60)`)
+
+In the meantime, run command below :
+```
+redis-cli
+``` 
+Then, in Redis server run :
+```
+keys *
+```
+
+If it replies with `1) "queues:default:delayed"`, our job has been queued and delayed as expected in Redis server.
+
+You can run `keys *` command repeatedly until the list is empty indicates that the job is done.
+
+Let's check our posted comment in news list API (`GET` : `/v1/news`) and look for the news we commented on it. Or, of course we can check it on our database table (`news_comments`) for a shortcut ;) 
+
+
+## Conclusion
+
+It's nice to use Lumen for API implementation, even though many services or libraries from Laravel are trimmed.
+So, we have to look for someone created a service provider to make it work with Lumen
+
+And for me, in this project i learned a lot of things such as API Resources, Form Requests, Design Pattern, Event Listener, Queue Job and of course implementing Queue with Redis is new to me.
+I don't know i have implemented correctly or not, i will figure it out and keep learning.
+
+Cheers :)
+
+--
+- - -
