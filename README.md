@@ -6,6 +6,11 @@ These instructions will get you a copy of the project up and running on your loc
 
 ### Set up Lumen project
 
+Open terminal and move to the project root directory
+```
+cd ~/full/path/to/lumen-passport
+```
+
 Copy `.env.example` file to `.env`
 ```
 cp .env.example .env
@@ -21,6 +26,7 @@ Then, we have to migrate our migration files to create our tables and seed defau
 
 Don't forget to create new database named `news`, we will use it as our database in this project as mentioned in our `.env` file (`DB_DATABASE=news`).
 ```
+mkdir storage/app/public
 php artisan migrate && php artisan db:seed
 ```
 It will creates 2 default users for us, `Admin` and `User`. So, keep in mind we will use these credentials to get `access_token` when login.
@@ -85,11 +91,30 @@ redis-cli ping
 If it replies `PONG`, then it works!
 
 ## Testing Our API
-To test our API, visit Postman Public Link below
+To test our API, click button bellow : 
 
-link
+[![Run in Postman](https://run.pstmn.io/button.svg)](https://app.getpostman.com/run-collection/3519adb63ec9d1e7664c) 
+
+##### or
+visit Postman Documenter Link below :
+
+https://documenter.getpostman.com/view/6993569/SzKWuxsz
+
+Then click `Run in Postman` button on top right and Open with `Postman for Mac/Windows`
 
 You can test every single endpoint in the postman collection
+
+-- Note --
+
+If it's failed to run from the link above, you can import it manually via `Import From Link` tab in Import window :
+```
+Collection link :
+
+https://www.getpostman.com/collections/3519adb63ec9d1e7664c
+```
+
+##### Remember!
+You have to create and use local environment manually, then add `bearer` variable in it with value `Bearer <access_token>` from login API (`POST` : `/v1/oauth/token`)
 
 #### Testing Redis Queue
 Now we are going to test our `queue job` with `redis`. In the project, we have 1 job (`CommentJob.php`) created in `app/Jobs` directory.
@@ -106,6 +131,11 @@ $job = new CommentJob($news, [
 // Add delay time to the job for 60 seconds, to see that our job is running and exist in redis-cli
 $this->dispatch($job->delay(60));
 ```
+-- Notes --
+
+Please login as `Admin` and create 1 news, then remember we will use the created news `ID` to post a comment later.
+
+--
 
 Before hitting the comment creation API, `Make sure Redis Server is already installed` and run command below in the project root directory to listen our queue job :
 ```
