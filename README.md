@@ -26,7 +26,6 @@ Then, we have to migrate our migration files to create our tables and seed defau
 
 Don't forget to create new database named `news`, we will use it as our database in this project as mentioned in our `.env` file (`DB_DATABASE=news`).
 ```
-mkdir storage/app/public
 php artisan migrate && php artisan db:seed
 ```
 It will creates 2 default users for us, `Admin` and `User`. So, keep in mind we will use these credentials to get `access_token` when login.
@@ -63,6 +62,7 @@ Lumen's artisan doesn't support `storage`, that's why we can't use `php artisan 
 
 So, we have to create it manually with `ln -s source_file symbolic_link`, example:
 ```
+mkdir storage/app/public
 ln -s ~/full/path/to/lumen-passport/storage/app/public ~/full/path/to/lument-passport/public/storage
 ```
 Replace `~/full/path/to/` with your full path of your project directory.
