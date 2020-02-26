@@ -18,10 +18,21 @@ composer install
 
 Then, we have to migrate our migration files to create our tables and seed default data for `users` and `roles`
 (in `database/migrations` and `database/seeds`)
+
+Don't forget to create new database named `news`, we will use it as our database in this project as mentioned in our `.env` file (`DB_DATABASE=news`).
 ```
 php artisan migrate && php artisan db:seed
 ```
+It will creates 2 default users for us, `Admin` and `User`. So, keep in mind we will use these credentials to get `access_token` when login.
+```
+Admin -> John Doe
+username: admin@gmail.com
+password: john123
 
+User -> Jane Doe
+username: user@gmail.com
+password: jane123
+```
 
 ##### Install Laravel Passport
 In order to make laravel passport work for Lumen, we are going to use `dusterio/lumen-passport` package, a simple service provider for Laravel Passport. 
