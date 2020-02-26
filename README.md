@@ -11,7 +11,7 @@ Open terminal and move to the project root directory
 cd ~/full/path/to/lumen-passport
 ```
 
-Here we assumes that our `Apache` and `MySQL` server are running.
+Here we assume that our `Apache` and `MySQL` server are running.
 
 ---
 
@@ -97,7 +97,7 @@ If it replies `PONG`, then it works!
 ## Testing Our API
 To test our API, click button bellow : 
 
-[![Run in Postman](https://run.pstmn.io/button.svg)](https://app.getpostman.com/run-collection/3519adb63ec9d1e7664c) 
+[![Run in Postman](https://run.pstmn.io/button.svg)](https://app.getpostman.com/run-collection/3519adb63ec9d1e764c)
 
 ##### or
 visit Postman Documenter Link below :
