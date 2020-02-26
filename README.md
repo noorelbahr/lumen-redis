@@ -11,6 +11,10 @@ Open terminal and move to the project root directory
 cd ~/full/path/to/lumen-passport
 ```
 
+Here we assumes that our `Apache` and `MySQL` server are running.
+
+---
+
 Copy `.env.example` file to `.env`
 ```
 cp .env.example .env
