@@ -97,7 +97,7 @@ If it replies `PONG`, then it works!
 ## Testing Our API
 To test our API, click button bellow : 
 
-[![Run in Postman](https://run.pstmn.io/button.svg)](https://app.getpostman.com/run-collection/3519adb63ec9d1e764c)
+[![Run in Postman](https://run.pstmn.io/button.svg)](https://app.getpostman.com/run-collection/3519adb63ec9d1e7664c)
 
 ##### or
 visit Postman Documenter Link below :
