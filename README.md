@@ -80,7 +80,7 @@ Now we can access our project with url http://localhost:8888
 
 
 ### Install Redis
-In this project, i used `redis queue` to for queuing the comment creation process.
+In this project, i used `redis queue` for queuing the comment creation process.
 
 So, we have to install redis server with following command 
 ```
