@@ -161,15 +161,16 @@ If it replies with `1) "queues:default:delayed"`, our job has been queued and de
 
 You can run `keys *` command repeatedly until the list is empty indicates that the job is done.
 
-Let's check our posted comment in news list API (`GET` : `/v1/news`) and look for the news we commented on it. Or, of course we can check it on our database table (`news_comments`) for a shortcut ;) 
+Let's check our posted comment in news list API (`GET` : `/v1/news`) and look for the news we commented on it. Or, of course we can check it in our database table (`news_comments`) for a shortcut ;) 
 
 
 ## Conclusion
 
 It's nice to use Lumen for API implementation, even though many services or libraries from Laravel are trimmed.
-So, we have to look for someone created a service provider to make it work with Lumen
+So, we have to look for someone created a service provider to make it work with Lumen.
 
 And for me, in this project i learned a lot of things such as API Resources, Form Requests, Design Pattern, Event Listener, Queue Job and of course implementing Queue with Redis is new to me.
+
 I don't know i have implemented correctly or not, i will figure it out and keep learning.
 
 Cheers :)
