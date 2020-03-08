@@ -146,7 +146,7 @@ Before hitting the comment creation API, `Make sure Redis Server is already inst
 php artisan queue:listen
 ```
 
-and then hit comment creation API (`POST` : `/v1/news/:id/comment`) and wait for the queue job to work about 60 minutes (mentioned above : `$job->delay(60)`)
+and then hit comment creation API (`POST` : `/v1/news/:id/comment`) and wait for the queue job to work about 60 seconds (mentioned above : `$job->delay(60)`)
 
 In the meantime, run command below :
 ```
