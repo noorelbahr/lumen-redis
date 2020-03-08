@@ -8,7 +8,7 @@ These instructions will get you a copy of the project up and running on your loc
 
 Open terminal and move to the project root directory
 ```
-cd ~/full/path/to/lumen-passport
+cd ~/full/path/to/lumen-redis
 ```
 
 Here we assume that our `Apache` and `MySQL` server are running.
@@ -67,7 +67,7 @@ Lumen's artisan doesn't support `storage`, that's why we can't use `php artisan 
 So, we have to create it manually with `ln -s source_file symbolic_link`, example:
 ```
 mkdir storage/app/public
-ln -s ~/full/path/to/lumen-passport/storage/app/public ~/full/path/to/lument-passport/public/storage
+ln -s ~/full/path/to/lumen-redis/storage/app/public ~/full/path/to/lumen-redis/public/storage
 ```
 Replace `~/full/path/to/` with your full path of your project directory.
 
